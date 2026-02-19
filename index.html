@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
   <head>
@@ -6,16 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Source Code 99 | Partner Transformasi Digital Anda</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Plus Jakarta Sans', 'sans-serif'],
+            },
+            colors: {
+              slate: {
+                950: '#020617',
+              },
+              blue: {
+                500: '#3b82f6',
+                600: '#2563eb',
+              }
+            }
+          }
+        }
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --bg-color: #020617;
+      }
       body {
         font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #030712;
+        background-color: var(--bg-color);
+        color: #f1f5f9;
+        min-height: 100vh;
       }
       .glass {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
       }
       .gradient-text {
         background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
@@ -23,24 +48,39 @@
         -webkit-text-fill-color: transparent;
       }
       .bg-mesh {
+        background-color: #020617;
         background-image: 
           radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-          radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-          radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+          radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%), 
+          radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+      }
+      /* Ensure sections have enough margin for sticky navbar */
+      section {
+        scroll-margin-top: 100px;
+      }
+      /* Selection color for that premium feel */
+      ::selection {
+        background: rgba(59, 130, 246, 0.3);
+        color: #fff;
+      }
+      /* Hide scrollbar but keep functionality */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
       }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "lucide-react": "https://esm.sh/lucide-react@^0.574.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.263.1"
   }
 }
 </script>
 </head>
-  <body class="text-slate-200 antialiased overflow-x-hidden">
+  <body class="antialiased overflow-x-hidden bg-slate-950">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
