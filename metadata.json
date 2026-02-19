@@ -1,0 +1,8 @@
+{
+  "name": "Source Code 99 - Tech Agency Landing Page",
+  "description": "A high-end, modern tech agency landing page for Source Code 99, focusing on digital transformation for UMKM and Startups with dark mode aesthetics and smooth animations.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
