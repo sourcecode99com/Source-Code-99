@@ -67,9 +67,10 @@ const Hero: React.FC<HeroProps> = ({ lang }) => {
               
               <div className="relative glass rounded-3xl overflow-hidden shadow-2xl">
                 <img 
-                  src="https://picsum.photos/id/1073/800/600" 
+                  src="https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/pitch-financial%20projection-sourcecode99com.jpg" 
                   alt="Dashboard Preview" 
                   className="w-full h-auto object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-500"
+                  referrerPolicy="no-referrer"
                 />
                 
                 <div className="absolute top-10 -right-8 glass p-4 rounded-2xl animate-bounce shadow-xl hidden sm:block">
