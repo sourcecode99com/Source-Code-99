@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -64,6 +65,7 @@ const App: React.FC = () => {
       </main>
 
       <Footer lang={lang} setLang={setLang} />
+      <Analytics />
     </div>
   );
 };
