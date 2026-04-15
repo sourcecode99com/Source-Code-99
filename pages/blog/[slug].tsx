@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../services/firebase';
-import { Article } from '../../types';
+import { db } from '../../src/services/firebase';
+import { Article } from '../../src/types';
 import { format } from 'date-fns';
 import { ArrowLeft, Calendar, User, Tag, Share2, ArrowRight } from 'lucide-react';
-import { Language, translations } from '../../../translations';
+import { Language, translations } from '../../translations';
 
 interface ArticleDetailProps {
   lang: Language;
 }
 
 const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
-  const { slug } = useParams<{ slug: string }>();
+  const router = useRouter();
+  const { slug } = router.query;
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const t = translations[lang].blog;
@@ -45,7 +47,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 pb-24 pt-24">
       <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-        <Link to="/blog" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold">
+        <Link href="/blog" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold">
           <ArrowLeft size={20} /> {t.backToBlog}
         </Link>
         <button className="p-2 hover:bg-slate-800 rounded-full text-slate-400 transition-colors">

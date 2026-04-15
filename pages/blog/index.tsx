@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../../services/firebase';
-import { Article } from '../../types';
-import { Link } from 'react-router-dom';
+import { db } from '../../src/services/firebase';
+import { Article } from '../../src/types';
+import Link from 'next/link';
 import { format } from 'date-fns';
 import { Search, ArrowRight } from 'lucide-react';
-import { Language, translations } from '../../../translations';
+import { Language, translations } from '../../translations';
 
 interface BlogListProps {
   lang: Language;
@@ -77,7 +77,7 @@ const BlogList: React.FC<BlogListProps> = ({ lang }) => {
             {filtered.map((article) => (
               <Link 
                 key={article.id} 
-                to={`/blog/${article.slug}`}
+                href={`/blog/${article.slug}`}
                 className="group glass rounded-3xl overflow-hidden hover:border-blue-500/50 transition-all duration-300 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden">

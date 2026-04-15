@@ -13,22 +13,22 @@ import {
   Search,
   Eye
 } from 'lucide-react';
-import { generateWeeklyTopics } from '../../services/aiService';
+import { generateWeeklyTopics } from '../../src/services/aiService';
 import { 
   getSchedules, 
   createSchedule, 
   deleteSchedule, 
   runAutoPublish,
   processSchedule 
-} from '../../services/scheduleService';
-import { Schedule } from '../../types';
+} from '../../src/services/scheduleService';
+import { Schedule } from '../../src/types';
 import { format } from 'date-fns';
-import { cn } from '../../lib/utils';
+import { cn } from '../../src/lib/utils';
 
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
 const SchedulePage: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -136,7 +136,7 @@ const SchedulePage: React.FC = () => {
   };
 
   const handleGenerateNow = (schedule: Schedule) => {
-    navigate(`/admin/editor?topic=${encodeURIComponent(schedule.topic)}&scheduleId=${schedule.id}`);
+    router.push(`/admin/editor?topic=${encodeURIComponent(schedule.topic)}&scheduleId=${schedule.id}`);
   };
 
   return (

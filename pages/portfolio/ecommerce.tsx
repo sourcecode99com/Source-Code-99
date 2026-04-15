@@ -1,33 +1,34 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { motion } from 'motion/react';
-import { CheckCircle2, ArrowRight, Calendar, Bell, Layout, CreditCard, Smartphone } from 'lucide-react';
-import { Language, translations } from '../translations';
-import { Link } from 'react-router-dom';
+import { CheckCircle2, ArrowRight, ShoppingCart, Layout, ShieldCheck, BarChart3, Search } from 'lucide-react';
+import { Language, translations } from '../../translations';
+import Link from 'next/link';
 
-interface BookingPortfolioProps {
+interface EcommercePortfolioProps {
   lang: Language;
 }
 
-const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
-  const t = translations[lang].portfolioBooking;
+const EcommercePortfolio: React.FC<EcommercePortfolioProps> = ({ lang }) => {
+  const t = translations[lang].portfolioEcommerce;
+  const nav = translations[lang].nav;
 
   const images = {
-    hero: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/booking%20online-sourcecode99com.jpg',
-    calendar: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/booking%20online-sourcecode99com.jpg',
-    mobile: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/mobile-booking%20online-sourcecode99com.jpg',
-    dashboard: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/dashboard%20admin-booking%20online-sourcecode99com.jpg'
+    hero: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/ecommerce-sourcecode99com.jpg',
+    product: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/ecommerce-sourcecode99com.jpg',
+    checkout: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/detail-ecommerce-sourcecode99com.jpg',
+    dashboard: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/admin-dashboard-ecommerce-sourcecode99com.jpg'
   };
 
-  const icons = [Calendar, Bell, Layout, CreditCard, Smartphone];
+  const icons = [ShoppingCart, Layout, ShieldCheck, BarChart3, Search];
 
   return (
     <div className="pt-24 pb-20 bg-slate-950">
-      <Helmet>
+      <Head>
         <title>{t.seo.title}</title>
         <meta name="description" content={t.seo.description} />
-        <meta name="keywords" content="sistem booking online, jasa pembuatan sistem booking, website reservasi online, aplikasi booking untuk UMKM, sistem reservasi berbasis web" />
-      </Helmet>
+        <meta name="keywords" content="website ecommerce untuk UMKM, jasa pembuatan website ecommerce, website toko online profesional, ecommerce development Indonesia" />
+      </Head>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 px-6 md:px-12">
@@ -39,7 +40,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
               transition={{ duration: 0.8 }}
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-8">
-                Portfolio: Booking System
+                Portfolio: E-Commerce
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8">
                 {t.hero.h1}
@@ -48,14 +49,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
                 <h2 className="text-white font-bold text-xl">{t.hero.overview}</h2>
                 <p>{t.hero.desc1}</p>
                 <p>{t.hero.desc2}</p>
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  {t.hero.challenges.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-3 text-slate-500 text-sm">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                      {item}
-                    </div>
-                  ))}
-                </div>
+                <p className="text-blue-400 font-medium italic">{t.hero.desc3}</p>
               </div>
             </motion.div>
 
@@ -69,7 +63,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
               <div className="relative glass rounded-3xl overflow-hidden border-white/10 shadow-2xl shadow-blue-600/10">
                 <img 
                   src={images.hero} 
-                  alt="Booking System Mockup" 
+                  alt="Ecommerce Mockup" 
                   className="w-full h-auto object-cover"
                   referrerPolicy="no-referrer"
                 />
@@ -79,28 +73,53 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
         </div>
       </section>
 
-      {/* Challenges Section */}
+      {/* Goals Section */}
       <section className="py-20 bg-slate-900/50 border-y border-white/5 px-6 md:px-12">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h3 className="text-3xl font-bold text-white mb-12 flex items-center justify-center gap-3">
-              <span className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center text-red-500">🎯</span>
-              {t.goals.title}
-            </h3>
-            <div className="grid sm:grid-cols-2 gap-6 mb-12">
-              {t.goals.items.map((item, idx) => (
-                <div key={idx} className="p-6 glass rounded-2xl border-white/5 text-left flex items-start gap-4">
-                  <div className="mt-1.5 w-2 h-2 rounded-full bg-red-500 shrink-0" />
-                  <span className="text-slate-300">{item}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-slate-500 font-medium italic">{t.goals.footer}</p>
-          </motion.div>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-8 glass rounded-3xl border-white/5"
+            >
+              <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-500">🎯</span>
+                {t.goals.title}
+              </h3>
+              <p className="text-slate-300 mb-6 font-semibold">{t.goals.challenge}</p>
+              <ul className="space-y-4">
+                {t.goals.challenges.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-slate-400">
+                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="p-8 glass rounded-3xl border-white/5"
+            >
+              <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-green-500">✔</span>
+                {t.goals.objective}
+              </h3>
+              <p className="text-slate-300 mb-6 font-semibold">{t.goals.objective}</p>
+              <ul className="space-y-4">
+                {t.goals.objectives.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-slate-400">
+                    <CheckCircle2 size={18} className="text-green-500 shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -120,7 +139,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
                 viewport={{ once: true }}
                 className="col-span-2 glass rounded-2xl overflow-hidden border-white/10"
               >
-                <img src={images.calendar} alt="Booking Calendar" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.product} alt="Product Page" className="w-full h-auto" referrerPolicy="no-referrer" />
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -129,7 +148,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
                 transition={{ delay: 0.2 }}
                 className="glass rounded-2xl overflow-hidden border-white/10"
               >
-                <img src={images.mobile} alt="Mobile Booking" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.checkout} alt="Checkout" className="w-full h-auto" referrerPolicy="no-referrer" />
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -138,7 +157,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
                 transition={{ delay: 0.3 }}
                 className="glass rounded-2xl overflow-hidden border-white/10"
               >
-                <img src={images.dashboard} alt="Admin Dashboard" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.dashboard} alt="Dashboard" className="w-full h-auto" referrerPolicy="no-referrer" />
               </motion.div>
             </div>
 
@@ -173,6 +192,18 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              className="order-2 lg:order-1"
+            >
+              <div className="relative glass rounded-3xl overflow-hidden border-white/10 shadow-2xl">
+                <img src={images.dashboard} alt="Business Impact" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
+              </div>
+            </motion.div>
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="order-1 lg:order-2"
             >
               <h2 className="text-3xl md:text-4xl font-black text-white mb-8">{t.impact.title}</h2>
               <p className="text-slate-300 mb-8 font-semibold">{t.impact.subtitle}</p>
@@ -190,16 +221,6 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
                 {t.impact.footer}
               </p>
             </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <div className="relative glass rounded-3xl overflow-hidden border-white/10 shadow-2xl">
-                <img src={images.dashboard} alt="Business Impact" className="w-full h-auto" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
@@ -209,11 +230,11 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-black text-white mb-8">{t.why.title}</h2>
           <p className="text-slate-400 mb-12 text-lg">{t.why.subtitle}</p>
-          <div className="grid sm:grid-cols-3 gap-6 mb-12 text-left">
+          <div className="grid sm:grid-cols-2 gap-6 mb-12 text-left">
             {t.why.items.map((item, idx) => (
-              <div key={idx} className="p-6 glass rounded-2xl border-white/5 flex flex-col items-center text-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600/20 flex items-center justify-center text-blue-500 shrink-0">
-                  <CheckCircle2 size={24} />
+              <div key={idx} className="p-6 glass rounded-2xl border-white/5 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center text-blue-500 shrink-0">
+                  <CheckCircle2 size={20} />
                 </div>
                 <span className="text-white font-medium">{item}</span>
               </div>
@@ -247,7 +268,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
               <a 
-                href="https://wa.me/6285123876559?text=Halo%20Sourcode99.com%20saya%20ingin%20berdiskusi%20tentang%20Sistem%20Booking" 
+                href="https://wa.me/6285123876559?text=Halo%20Sourcode99.com%20saya%20ingin%20berdiskusi%20tentang%20Ecommerce" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-lg transition-all shadow-2xl shadow-blue-600/40 flex items-center justify-center gap-3"
@@ -255,7 +276,7 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
                 {t.cta.btn1} <ArrowRight size={20} />
               </a>
               <Link 
-                to="/#cta"
+                href="/#cta"
                 className="px-10 py-5 glass hover:bg-white/10 text-white rounded-full font-black text-lg transition-all border-white/10 flex items-center justify-center gap-3"
               >
                 {t.cta.btn2}
@@ -268,4 +289,4 @@ const BookingPortfolio: React.FC<BookingPortfolioProps> = ({ lang }) => {
   );
 };
 
-export default BookingPortfolio;
+export default EcommercePortfolio;

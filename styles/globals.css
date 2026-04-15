@@ -1,18 +1,12 @@
-@import "tailwindcss";
-
-@theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --color-slate-950: #020617;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #2563eb;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --bg-color: #020617;
 }
 
 body {
-  font-family: var(--font-sans);
   background-color: var(--bg-color);
   color: #f1f5f9;
   min-height: 100vh;

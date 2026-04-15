@@ -1,32 +1,33 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { motion } from 'motion/react';
-import { CheckCircle2, ArrowRight, BarChart3, PieChart, TrendingUp, Target, FileText, ShieldCheck, Cpu } from 'lucide-react';
-import { Language, translations } from '../translations';
-import { Link } from 'react-router-dom';
+import { CheckCircle2, ArrowRight, Layout, Search, Smartphone, MessageSquare, Globe, TrendingUp, BarChart3 } from 'lucide-react';
+import { Language, translations } from '../../translations';
+import Link from 'next/link';
 
-interface FinancialPortfolioProps {
+interface CompanyProfilePortfolioProps {
   lang: Language;
 }
 
-const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
-  const t = translations[lang].portfolioFinancial;
+const CompanyProfilePortfolio: React.FC<CompanyProfilePortfolioProps> = ({ lang }) => {
+  const t = translations[lang].portfolioCompanyProfile;
 
   const images = {
-    dashboard: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/dashboard-financial%20projection-sourcecode99com.jpg',
-    pitching: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/pitch-financial%20projection-sourcecode99com.jpg',
-    saas: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/revenue%20statistic-financial%20projection-sourcecode99com.jpg'
+    hero: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/homepage-company%20profile-sourcecode99com.jpg',
+    homepage: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/homepage-company%20profile-sourcecode99com.jpg',
+    traffic: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/Traffic-company%20profile-sourcecode99com.jpg',
+    seo: 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/SEO-growth-company%20profile-sourcecode99com.jpg'
   };
 
-  const icons = [Target, BarChart3, PieChart, FileText];
+  const icons = [Layout, Globe, Search, Smartphone, MessageSquare];
 
   return (
     <div className="pt-24 pb-20 bg-slate-950">
-      <Helmet>
+      <Head>
         <title>{t.seo.title}</title>
         <meta name="description" content={t.seo.description} />
-        <meta name="keywords" content="financial projection startup, feasibility study IT, jasa financial planner startup, business plan startup IT, investor ready startup documentation" />
-      </Helmet>
+        <meta name="keywords" content="website company profile, jasa pembuatan website company profile, website perusahaan profesional, company profile online, website bisnis UMKM" />
+      </Head>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 px-6 md:px-12">
@@ -38,7 +39,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
               transition={{ duration: 0.8 }}
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-8">
-                Portfolio: Financial Blueprint
+                Portfolio: Company Profile
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8">
                 {t.hero.h1}
@@ -47,7 +48,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
                 <h2 className="text-white font-bold text-xl">{t.hero.overview}</h2>
                 <p>{t.hero.desc1}</p>
                 <p>{t.hero.desc2}</p>
-                <p className="text-blue-400 font-medium italic mt-6">{t.hero.footer}</p>
+                <p className="text-blue-400 font-medium italic">{t.hero.footer}</p>
               </div>
             </motion.div>
 
@@ -60,8 +61,8 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
               <div className="absolute -inset-4 bg-blue-600/20 blur-3xl rounded-full opacity-30"></div>
               <div className="relative glass rounded-3xl overflow-hidden border-white/10 shadow-2xl shadow-blue-600/10">
                 <img 
-                  src={images.dashboard} 
-                  alt="Financial Dashboard Mockup" 
+                  src={images.hero} 
+                  alt="Company Profile Mockup" 
                   className="w-full h-auto object-cover"
                   referrerPolicy="no-referrer"
                 />
@@ -112,7 +113,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
                 viewport={{ once: true }}
                 className="col-span-2 glass rounded-2xl overflow-hidden border-white/10"
               >
-                <img src={images.dashboard} alt="Financial Model" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.homepage} alt="Homepage Design" className="w-full h-auto" referrerPolicy="no-referrer" />
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -121,7 +122,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
                 transition={{ delay: 0.2 }}
                 className="glass rounded-2xl overflow-hidden border-white/10"
               >
-                <img src={images.pitching} alt="Pitching Session" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.traffic} alt="Traffic Analytics" className="w-full h-auto" referrerPolicy="no-referrer" />
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -130,11 +131,11 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
                 transition={{ delay: 0.3 }}
                 className="glass rounded-2xl overflow-hidden border-white/10"
               >
-                <img src={images.saas} alt="SaaS Metrics" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.seo} alt="SEO Growth" className="w-full h-auto" referrerPolicy="no-referrer" />
               </motion.div>
             </div>
 
-            <div className="space-y-6 order-1 lg:order-2">
+            <div className="space-y-8 order-1 lg:order-2">
               {t.solutions.items.map((item, idx) => {
                 const Icon = icons[idx] || CheckCircle2;
                 return (
@@ -159,51 +160,8 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
             </div>
           </div>
 
-          {/* SaaS Metrics Section */}
-          <div className="py-24 border-t border-white/5">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-black text-white mb-6">{t.saas.title}</h2>
-              <p className="text-slate-400 text-lg max-w-3xl mx-auto">{t.saas.subtitle}</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-              {t.saas.metrics.map((metric, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="p-8 glass rounded-3xl border-white/5 hover:border-blue-600/20 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 mb-6">
-                    <TrendingUp size={24} />
-                  </div>
-                  <h4 className="text-white font-bold text-lg mb-3">{metric.title}</h4>
-                  <p className="text-slate-400 text-sm leading-relaxed">{metric.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="p-10 glass rounded-[2.5rem] border-white/5 bg-blue-600/5">
-              <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                <BarChart3 className="text-blue-500" />
-                {t.saas.projection.title}
-              </h3>
-              <div className="grid sm:grid-cols-2 gap-6 mb-10">
-                {t.saas.projection.items.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-4 text-slate-300">
-                    <CheckCircle2 className="text-blue-500 shrink-0" size={20} />
-                    <span className="font-medium">{item}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-slate-500 text-center font-medium border-t border-white/5 pt-8">{t.saas.projection.footer}</p>
-            </div>
-          </div>
-
           {/* Impact Section */}
-          <div className="grid lg:grid-cols-2 gap-16 items-center py-24 border-t border-white/5">
+          <div className="grid lg:grid-cols-2 gap-16 items-center py-20 border-t border-white/5">
             <motion.div 
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -231,7 +189,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
               viewport={{ once: true }}
             >
               <div className="relative glass rounded-3xl overflow-hidden border-white/10 shadow-2xl">
-                <img src={images.saas} alt="SaaS Metrics Growth" className="w-full h-auto" referrerPolicy="no-referrer" />
+                <img src={images.seo} alt="Business Impact" className="w-full h-auto" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
               </div>
             </motion.div>
@@ -279,7 +237,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center relative z-10">
               <a 
-                href="https://wa.me/6285123876559?text=Halo%20Sourcode99.com%20saya%20ingin%20berdiskusi%20tentang%20Financial%20Projection" 
+                href="https://wa.me/6285123876559?text=Halo%20Sourcode99.com%20saya%20ingin%20berdiskusi%20tentang%20Website%20Company%20Profile" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black text-lg transition-all shadow-2xl shadow-blue-600/40 flex items-center justify-center gap-3"
@@ -287,7 +245,7 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
                 {t.cta.btn1} <ArrowRight size={20} />
               </a>
               <Link 
-                to="/#cta"
+                href="/#cta"
                 className="px-10 py-5 glass hover:bg-white/10 text-white rounded-full font-black text-lg transition-all border-white/10 flex items-center justify-center gap-3"
               >
                 {t.cta.btn2}
@@ -300,4 +258,4 @@ const FinancialPortfolio: React.FC<FinancialPortfolioProps> = ({ lang }) => {
   );
 };
 
-export default FinancialPortfolio;
+export default CompanyProfilePortfolio;

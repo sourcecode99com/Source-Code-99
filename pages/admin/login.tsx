@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../../services/firebase';
+import { auth } from '../../src/services/firebase';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -11,10 +11,15 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [user, authLoading] = useAuthState(auth);
-  const navigate = useNavigate();
+  const router = useRouter();
 
-  if (authLoading) return null;
-  if (user) return <Navigate to="/admin" replace />;
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/admin');
+    }
+  }, [user, authLoading, router]);
+
+  if (authLoading || user) return null;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +27,7 @@ const Login: React.FC = () => {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/admin');
+      router.push('/admin');
     } catch (err: any) {
       setError('Email atau password salah.');
     } finally {
@@ -36,7 +41,7 @@ const Login: React.FC = () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate('/admin');
+      router.push('/admin');
     } catch (err: any) {
       setError('Gagal masuk dengan Google.');
     } finally {

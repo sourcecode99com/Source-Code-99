@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, limit, getDocs, count } from 'firebase/firestore';
-import { db } from '../../services/firebase';
-import { Article } from '../../types';
+import { db } from '../../src/services/firebase';
+import { Article } from '../../src/types';
 import { FileText, Eye, Clock, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
-import { cn } from '../../lib/utils';
+import Link from 'next/link';
+import { cn } from '../../src/lib/utils';
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState({ total: 0, published: 0, drafts: 0 });
@@ -71,7 +71,7 @@ const Dashboard: React.FC = () => {
       <div className="glass rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white">Recent Articles</h2>
-          <Link to="/admin/articles" className="text-blue-500 text-sm hover:underline">View All</Link>
+          <Link href="/admin/articles" className="text-blue-500 text-sm hover:underline">View All</Link>
         </div>
         <div className="divide-y divide-slate-800">
           {recentArticles.map((article) => (
@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
                 )}>
                   {article.status}
                 </span>
-                <Link to={`/admin/editor/${article.id}`} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+                <Link href={`/admin/editor/${article.id}`} className="p-2 hover:bg-slate-700 rounded-lg transition-colors">
                   <FileText size={18} className="text-slate-400" />
                 </Link>
               </div>

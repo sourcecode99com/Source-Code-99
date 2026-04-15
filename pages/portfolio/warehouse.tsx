@@ -1,9 +1,9 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import Head from 'next/head';
 import { motion } from 'motion/react';
 import { CheckCircle2, ArrowRight, BarChart3, Scan, Boxes, Users, Database, ShieldCheck, Cpu, Layout } from 'lucide-react';
-import { Language, translations } from '../translations';
-import { Link } from 'react-router-dom';
+import { Language, translations } from '../../translations';
+import Link from 'next/link';
 
 interface WarehousePortfolioProps {
   lang: Language;
@@ -22,11 +22,11 @@ const WarehousePortfolio: React.FC<WarehousePortfolioProps> = ({ lang }) => {
 
   return (
     <div className="pt-24 pb-20 bg-slate-950">
-      <Helmet>
+      <Head>
         <title>{t.seo.title}</title>
         <meta name="description" content={t.seo.description} />
         <meta name="keywords" content="warehouse management system, sistem manajemen gudang, jasa pembuatan WMS, aplikasi stok gudang, software inventory gudang" />
-      </Helmet>
+      </Head>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 px-6 md:px-12">
@@ -266,7 +266,7 @@ const WarehousePortfolio: React.FC<WarehousePortfolioProps> = ({ lang }) => {
                 {t.cta.btn1} <ArrowRight size={20} />
               </a>
               <Link 
-                to="/#cta"
+                href="/#cta"
                 className="px-10 py-5 glass hover:bg-white/10 text-white rounded-full font-black text-lg transition-all border-white/10 flex items-center justify-center gap-3"
               >
                 {t.cta.btn2}
