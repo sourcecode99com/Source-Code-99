@@ -46,6 +46,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setLang }) => {
             <ul className="space-y-4 text-slate-400 text-sm">
               <li><HashLink smooth to="/#problem" className="hover:text-blue-500">{nav.solusi}</HashLink></li>
               <li><HashLink smooth to="/services" className="hover:text-blue-500">{nav.layanan}</HashLink></li>
+              <li><Link to="/blog" className="hover:text-blue-500" onClick={() => window.scrollTo(0, 0)}>Blog</Link></li>
               <li><HashLink smooth to="/#portfolio" className="hover:text-blue-500">{nav.portfolio}</HashLink></li>
               <li><HashLink smooth to="/#why-us" className="hover:text-blue-500">{nav.kenapa}</HashLink></li>
             </ul>

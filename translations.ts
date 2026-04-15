@@ -138,6 +138,17 @@ export const translations = {
       privacy: 'Kebijakan Privasi',
       terms: 'Syarat & Ketentuan',
     },
+    blog: {
+      title: 'Artikel Terbaru',
+      subtitle: 'Temukan artikel terbaru seputar teknologi, bisnis, dan tutorial dari tim ahli kami.',
+      searchPlaceholder: 'Cari artikel...',
+      noResults: 'Tidak ada artikel yang ditemukan.',
+      clearSearch: 'Hapus pencarian',
+      readMore: 'Baca Selengkapnya',
+      backToBlog: 'Kembali ke Blog',
+      loading: 'Memuat...',
+      notFound: 'Artikel tidak ditemukan.',
+    },
     portfolioEcommerce: {
       seo: {
         title: 'Portfolio Website Ecommerce untuk UMKM | Source Code 99',
@@ -847,6 +858,17 @@ export const translations = {
       contact: 'Contact Us',
       privacy: 'Privacy Policy',
       terms: 'Terms of Service',
+    },
+    blog: {
+      title: 'Latest Insights',
+      subtitle: 'Discover the latest articles about technology, business, and tutorials from our expert team.',
+      searchPlaceholder: 'Search articles...',
+      noResults: 'No articles found matching your search.',
+      clearSearch: 'Clear search',
+      readMore: 'Read More',
+      backToBlog: 'Back to Blog',
+      loading: 'Loading...',
+      notFound: 'Article not found.',
     },
     portfolioEcommerce: {
       seo: {

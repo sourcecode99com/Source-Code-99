@@ -1,0 +1,46 @@
+{
+  "entities": {
+    "Article": {
+      "title": "Article",
+      "description": "A news article or blog post",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the article" },
+        "slug": { "type": "string", "description": "URL-friendly version of the title" },
+        "content": { "type": "string", "description": "The main body of the article (Markdown)" },
+        "excerpt": { "type": "string", "description": "A short summary of the article" },
+        "coverImage": { "type": "string", "description": "URL to the cover image" },
+        "category": { "type": "string", "description": "Article category" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "List of tags" },
+        "author": { "type": "string", "description": "Author name or ID" },
+        "status": { "type": "string", "enum": ["draft", "published"], "description": "Publication status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["title", "slug", "content", "author", "status"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "A scheduled article generation task",
+      "type": "object",
+      "properties": {
+        "topic": { "type": "string", "description": "The topic to generate an article for" },
+        "publishDate": { "type": "string", "format": "date-time", "description": "When the article should be published" },
+        "status": { "type": "string", "enum": ["scheduled", "generated", "published"], "description": "Current status of the schedule" },
+        "articleId": { "type": "string", "description": "ID of the generated article (if any)" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["topic", "publishDate", "status"]
+    }
+  },
+  "firestore": {
+    "/articles/{articleId}": {
+      "schema": "Article",
+      "description": "Collection of blog articles"
+    },
+    "/schedules/{scheduleId}": {
+      "schema": "Schedule",
+      "description": "Collection of content schedules"
+    }
+  }
+}

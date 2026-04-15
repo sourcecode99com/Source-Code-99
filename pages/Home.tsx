@@ -6,6 +6,7 @@ import Services from '../components/Services';
 import WhyUs from '../components/WhyUs';
 import Portfolio from '../components/Portfolio';
 import Testimonials from '../components/Testimonials';
+import LatestArticles from '../src/components/LatestArticles';
 import { Zap, ArrowRight } from 'lucide-react';
 import { Language, translations } from '../translations';
 
@@ -83,6 +84,8 @@ const Home: React.FC<HomeProps> = ({ lang }) => {
           </div>
         </div>
       </section>
+
+      <LatestArticles lang={lang} />
     </>
   );
 };
