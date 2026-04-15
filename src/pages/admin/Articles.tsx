@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
-import { db } from '../../src/services/firebase';
-import { Article, Schedule } from '../../src/types';
+import { db } from '../../services/firebase';
+import { Article, Schedule } from '../../types';
 import { Search, Plus, Edit2, Trash2, Eye, Filter, MoreVertical, Calendar, Clock, Sparkles } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { cn } from '../../src/lib/utils';
+import { cn } from '../../lib/utils';
 
 const Articles: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -88,7 +88,7 @@ const Articles: React.FC = () => {
           <h1 className="text-3xl font-bold text-white">Articles</h1>
           <p className="text-slate-400">Kelola semua konten blog Anda di sini.</p>
         </div>
-        <Link href="/admin/editor" className="btn-primary flex items-center gap-2">
+        <Link to="/admin/editor" className="btn-primary flex items-center gap-2">
           <Plus size={20} /> New Article
         </Link>
       </header>
@@ -196,14 +196,14 @@ const Articles: React.FC = () => {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link 
-                            href={`/blog/${article.slug}`} 
+                            to={`/blog/${article.slug}`} 
                             target="_blank"
                             className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 transition-colors"
                           >
                             <Eye size={18} />
                           </Link>
                           <Link 
-                            href={`/admin/editor/${article.id}`} 
+                            to={`/admin/editor/${article.id}`} 
                             className="p-2 hover:bg-slate-700 rounded-lg text-blue-400 transition-colors"
                           >
                             <Edit2 size={18} />
@@ -267,7 +267,7 @@ const Articles: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         {item.status === 'scheduled' && (
                           <Link 
-                            href={`/admin/editor?topic=${encodeURIComponent(item.topic)}&scheduleId=${item.id}`}
+                            to={`/admin/editor?topic=${encodeURIComponent(item.topic)}&scheduleId=${item.id}`}
                             className="p-2 hover:bg-blue-500/10 rounded-lg text-blue-400 transition-colors flex items-center gap-2 text-xs font-bold"
                           >
                             <Sparkles size={16} /> Generate

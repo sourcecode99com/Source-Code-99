@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Language, translations } from '../translations';
 
 interface PortfolioProps {
@@ -66,7 +66,7 @@ const Portfolio: React.FC<PortfolioProps> = ({ lang }) => {
           {items.map((item, idx) => (
             <Link 
               key={idx} 
-              href={item.link || "#"} 
+              to={item.link || "#"} 
               className="group relative rounded-3xl overflow-hidden aspect-[4/3] block"
             >
               <img 

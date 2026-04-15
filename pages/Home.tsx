@@ -1,5 +1,5 @@
 import React from 'react';
-import Head from 'next/head';
+import { Helmet } from 'react-helmet-async';
 import Hero from '../components/Hero';
 import ProblemSection from '../components/ProblemSection';
 import Services from '../components/Services';
@@ -19,12 +19,12 @@ const Home: React.FC<HomeProps> = ({ lang }) => {
 
   return (
     <>
-      <Head>
+      <Helmet>
         <title>Source Code 99 | Jasa Pembuatan Website & Aplikasi Professional</title>
         <meta name="description" content="Source Code 99 bantu UMKM & startup punya sistem digital yang simpel, keren, dan benar-benar membantu bisnis tumbuh pesat." />
         <meta property="og:title" content="Source Code 99 | Digital Transformation Partner" />
         <meta property="og:type" content="website" />
-      </Head>
+      </Helmet>
 
       <Hero lang={lang} />
       <ProblemSection lang={lang} />

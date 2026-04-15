@@ -1,5 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
+import { HashLink } from 'react-router-hash-link';
 import { Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import { Language, translations } from '../translations';
 
@@ -17,7 +18,7 @@ const Footer: React.FC<FooterProps> = ({ lang, setLang }) => {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 lg:col-span-1">
-            <Link href="/" className="block mb-8 hover:scale-105 transition-transform">
+            <Link to="/" className="block mb-8 hover:scale-105 transition-transform" onClick={() => window.scrollTo(0, 0)}>
               <img 
                 src="https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/lgo-sc99-panjang.png" 
                 alt="Source Code 99" 
@@ -33,21 +34,21 @@ const Footer: React.FC<FooterProps> = ({ lang, setLang }) => {
           <div>
             <h3 className="text-white font-black uppercase tracking-widest text-xs mb-8">{t.services}</h3>
             <ul className="space-y-4 text-slate-400 text-sm">
-              <li><Link href="/services#web" className="hover:text-blue-500">{t.serviceItems.web}</Link></li>
-              <li><Link href="/services#app" className="hover:text-blue-500">{t.serviceItems.app}</Link></li>
-              <li><Link href="/services#mobile" className="hover:text-blue-500">{t.serviceItems.mobile}</Link></li>
-              <li><Link href="/services#financial" className="hover:text-blue-500">{t.serviceItems.financial}</Link></li>
+              <li><HashLink smooth to="/services#web" className="hover:text-blue-500">{t.serviceItems.web}</HashLink></li>
+              <li><HashLink smooth to="/services#app" className="hover:text-blue-500">{t.serviceItems.app}</HashLink></li>
+              <li><HashLink smooth to="/services#mobile" className="hover:text-blue-500">{t.serviceItems.mobile}</HashLink></li>
+              <li><HashLink smooth to="/services#financial" className="hover:text-blue-500">{t.serviceItems.financial}</HashLink></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-black uppercase tracking-widest text-xs mb-8">{t.navigation}</h3>
             <ul className="space-y-4 text-slate-400 text-sm">
-              <li><Link href="/#problem" className="hover:text-blue-500">{nav.solusi}</Link></li>
-              <li><Link href="/services" className="hover:text-blue-500">{nav.layanan}</Link></li>
-              <li><Link href="/blog" className="hover:text-blue-500">Blog</Link></li>
-              <li><Link href="/#portfolio" className="hover:text-blue-500">{nav.portfolio}</Link></li>
-              <li><Link href="/#why-us" className="hover:text-blue-500">{nav.kenapa}</Link></li>
+              <li><HashLink smooth to="/#problem" className="hover:text-blue-500">{nav.solusi}</HashLink></li>
+              <li><HashLink smooth to="/services" className="hover:text-blue-500">{nav.layanan}</HashLink></li>
+              <li><Link to="/blog" className="hover:text-blue-500" onClick={() => window.scrollTo(0, 0)}>Blog</Link></li>
+              <li><HashLink smooth to="/#portfolio" className="hover:text-blue-500">{nav.portfolio}</HashLink></li>
+              <li><HashLink smooth to="/#why-us" className="hover:text-blue-500">{nav.kenapa}</HashLink></li>
             </ul>
           </div>
 
@@ -69,8 +70,8 @@ const Footer: React.FC<FooterProps> = ({ lang, setLang }) => {
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-slate-500 text-[10px] uppercase font-black tracking-widest">
           <p>© 2026 Source Code 99. Digital Agency.</p>
           <div className="flex gap-8">
-            <Link href="/privacy" className="hover:text-white">Privacy</Link>
-            <Link href="/terms" className="hover:text-white">Terms</Link>
+            <Link to="/privacy" className="hover:text-white">Privacy</Link>
+            <Link to="/terms" className="hover:text-white">Terms</Link>
           </div>
         </div>
       </div>

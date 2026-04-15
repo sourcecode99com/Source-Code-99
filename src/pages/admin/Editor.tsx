@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, auth, storage } from '../../../src/services/firebase';
-import { Article, ArticleInput } from '../../../src/types';
+import { db, auth, storage } from '../../services/firebase';
+import { Article, ArticleInput } from '../../types';
 import { Save, ArrowLeft, Image as ImageIcon, Sparkles, Loader2, Eye } from 'lucide-react';
-import { slugify, cn } from '../../../src/lib/utils';
-import AIAssistant from '../../../src/components/AIAssistant';
-import TiptapEditor from '../../../src/components/TiptapEditor';
-import { useTheme } from '../../../src/context/ThemeContext';
+import { slugify, cn } from '../../lib/utils';
+import AIAssistant from '../../components/AIAssistant';
+import TiptapEditor from '../../components/TiptapEditor';
+import { useTheme } from '../../context/ThemeContext';
 
 const Editor: React.FC = () => {
   const { theme } = useTheme();
-  const router = useRouter();
-  const { id: idParam, topic: topicQuery, scheduleId: scheduleIdQuery } = router.query;
-  const id = Array.isArray(idParam) ? idParam[0] : idParam;
-  const initialTopic = (Array.isArray(topicQuery) ? topicQuery[0] : topicQuery) || '';
-  const scheduleId = (Array.isArray(scheduleIdQuery) ? scheduleIdQuery[0] : scheduleIdQuery) || '';
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialTopic = queryParams.get('topic') || '';
+  const scheduleId = queryParams.get('scheduleId') || '';
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
@@ -144,7 +145,7 @@ const Editor: React.FC = () => {
           });
         }
       }
-      router.push('/admin/articles');
+      navigate('/admin/articles');
     } catch (err) {
       console.error(err);
       alert('Gagal menyimpan artikel.');
@@ -199,7 +200,7 @@ const Editor: React.FC = () => {
 
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.back()} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-800 rounded-lg text-slate-400">
             <ArrowLeft size={24} />
           </button>
           <h1 className="text-2xl font-bold text-white">{id ? 'Edit Article' : 'New Article'}</h1>

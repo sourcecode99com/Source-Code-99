@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { Article } from '../types';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ArrowRight, Calendar } from 'lucide-react';
 import { Language } from '../../translations';
@@ -54,7 +54,7 @@ const LatestArticles: React.FC<LatestArticlesProps> = ({ lang }) => {
             </p>
           </div>
           <Link 
-            href="/blog" 
+            to="/blog" 
             className="inline-flex items-center gap-2 text-blue-500 font-bold hover:gap-4 transition-all"
           >
             {lang === 'ID' ? 'Lihat Semua Artikel' : 'View All Articles'} <ArrowRight size={20} />
@@ -70,7 +70,7 @@ const LatestArticles: React.FC<LatestArticlesProps> = ({ lang }) => {
             articles.map((article) => (
               <Link 
                 key={article.id} 
-                href={`/blog/${article.slug}`}
+                to={`/blog/${article.slug}`}
                 className="group glass rounded-[2.5rem] overflow-hidden hover:border-blue-500/50 transition-all duration-300 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden">

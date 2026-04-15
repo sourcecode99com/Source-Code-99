@@ -1,5 +1,5 @@
 import React from 'react';
-import Head from 'next/head';
+import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { Layout, Database, Smartphone, CheckCircle2, BarChart3, ArrowRight, Target, Users, Zap, ShieldCheck, TrendingUp } from 'lucide-react';
 import { Language, translations } from '../translations';
@@ -45,10 +45,10 @@ const ServicesPage: React.FC<ServicesPageProps> = ({ lang }) => {
 
   return (
     <div className="pt-32 pb-24 bg-slate-950">
-      <Head>
+      <Helmet>
         <title>{lang === 'ID' ? 'Layanan Detail - Website, Aplikasi & Strategi' : 'Detailed Services - Web, Apps & Strategy'} | Source Code 99</title>
         <meta name="description" content="Pelajari detail layanan kami: Jasa pembuatan website profesional, aplikasi web custom, mobile apps Android/iOS, serta feasibility study untuk startup." />
-      </Head>
+      </Helmet>
 
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <header className="max-w-4xl mb-32">

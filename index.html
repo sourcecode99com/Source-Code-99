@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+    <title>Source Code 99 | Partner Transformasi Digital Anda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+            colors: { slate: { 950: '#020617' }, blue: { 500: '#3b82f6', 600: '#2563eb' } }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root { --bg-color: #020617; }
+      body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-color); color: #f1f5f9; min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+      
+      /* Light Mode Overrides */
+      .light body { background-color: #f8fafc; color: #0f172a; }
+      .light .glass { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0, 0, 0, 0.05); }
+      .light .text-white { color: #0f172a !important; }
+      .light .text-slate-200 { color: #1e293b !important; }
+      .light .text-slate-300 { color: #334155 !important; }
+      .light .text-slate-400 { color: #64748b !important; }
+      .light .text-slate-500 { color: #94a3b8 !important; }
+      .light .bg-slate-950 { background-color: #f8fafc !important; }
+      .light .bg-slate-900 { background-color: #f1f5f9 !important; }
+      .light .bg-slate-800 { background-color: #e2e8f0 !important; }
+      .light .border-slate-800 { border-color: #e2e8f0 !important; }
+      .light .input-field { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+      .light .input-field::placeholder { color: #94a3b8; }
+      .light .btn-secondary { background-color: #e2e8f0; color: #0f172a; }
+      .light .btn-secondary:hover { background-color: #cbd5e1; }
+      .light .prose { color: #334155; }
+      .light .prose h1, .light .prose h2, .light .prose h3 { color: #0f172a; }
+
+      .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+      .gradient-text { background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+      .bg-mesh { background-color: #020617; background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%); }
+      section { scroll-margin-top: 100px; }
+      ::selection { background: rgba(59, 130, 246, 0.3); color: #fff; }
+      
+      /* Custom Utility Classes */
+      .input-field {
+        width: 100% !important;
+        padding: 0.5rem 1rem !important;
+        background-color: #0f172a !important; /* slate-900 */
+        border: 1px solid #1e293b !important; /* slate-800 */
+        border-radius: 0.5rem !important;
+        color: #ffffff !important;
+        outline: none !important;
+        transition: all 0.2s !important;
+        appearance: none; /* For select */
+      }
+      select.input-field {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1rem;
+        padding-right: 2.5rem !important;
+      }
+      .input-field:focus {
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
+        border-color: #3b82f6 !important;
+      }
+      .input-field::placeholder {
+        color: #64748b;
+      }
+      
+      .btn-primary {
+        padding: 0.5rem 1rem;
+        background-color: #2563eb;
+        color: white;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      .btn-primary:hover {
+        background-color: #1d4ed8;
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+      }
+
+      .btn-secondary {
+        padding: 0.5rem 1rem;
+        background-color: #1e293b;
+        color: #f1f5f9;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      .btn-secondary:hover {
+        background-color: #334155;
+      }
+
+      .mobile-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(2, 6, 23, 0.8);
+        backdrop-filter: blur(4px);
+        z-index: 40;
+      }
+
+      /* Markdown/HTML Content Styling */
+      .prose {
+        color: #cbd5e1;
+        line-height: 1.625;
+      }
+      .prose h1 { font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 1.5rem; margin-top: 2rem; }
+      .prose h2 { font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem; margin-top: 1.5rem; }
+      .prose h3 { font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem; margin-top: 1rem; }
+      .prose p { margin-bottom: 1rem; }
+      .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+      .prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+      .prose blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; font-style: italic; margin: 1.5rem 0; }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.263.1",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.14.2",
+    "react-helmet-async": "https://esm.sh/react-helmet-async@1.3.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/"
+  }
+}
+</script>
+  </head>
+  <body class="antialiased overflow-x-hidden bg-slate-950">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

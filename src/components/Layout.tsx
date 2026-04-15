@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import React, { useState } from 'react';
+import { Outlet, Navigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase';
 import Sidebar from './Sidebar';
 import { Menu, X } from 'lucide-react';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout: React.FC = () => {
   const [user, loading] = useAuthState(auth);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/admin/login');
-    }
-  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -25,7 +18,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (!user) {
-    return null;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return (
@@ -54,7 +47,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
 
       <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
-        {children}
+        <Outlet />
       </main>
     </div>
   );

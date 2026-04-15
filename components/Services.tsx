@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Layout, Database, Smartphone, BarChart3, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
+import { HashLink } from 'react-router-hash-link';
 import { Language, translations } from '../translations';
 
 interface ServicesProps {
@@ -93,12 +93,13 @@ const Services: React.FC<ServicesProps> = ({ lang }) => {
                   </p>
                 )}
 
-                <Link 
-                  href={`/services#${s.id}`}
+                <HashLink 
+                  smooth 
+                  to={`/services#${s.id}`}
                   className="w-full py-3 glass text-white text-sm font-bold rounded-xl hover:bg-white/10 transition-colors text-center"
                 >
                   {t.cta}
-                </Link>
+                </HashLink>
               </div>
             </div>
           ))}

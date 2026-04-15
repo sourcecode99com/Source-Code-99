@@ -1,6 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
-import Head from 'next/head';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { ArrowLeft } from 'lucide-react';
 import { Language } from '../translations';
 
@@ -17,12 +17,12 @@ const LegalPage: React.FC<LegalPageProps> = ({ type, lang }) => {
   
   return (
     <article className="pt-32 pb-24 min-h-screen bg-slate-950">
-      <Head>
+      <Helmet>
         <title>{title} | Source Code 99</title>
         <meta name="robots" content="noindex, follow" />
-      </Head>
+      </Helmet>
       <div className="max-w-4xl mx-auto px-6">
-        <Link href="/" className="flex items-center gap-2 text-blue-500 font-bold mb-12 hover:translate-x-1 transition-transform">
+        <Link to="/" className="flex items-center gap-2 text-blue-500 font-bold mb-12 hover:translate-x-1 transition-transform">
           <ArrowLeft size={20} /> {lang === 'ID' ? 'Kembali ke Beranda' : 'Back to Home'}
         </Link>
         
