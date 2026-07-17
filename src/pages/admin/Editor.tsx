@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
 import { db, auth, storage } from '../../services/firebase';
 import { Article, ArticleInput } from '../../types';
-import { Save, ArrowLeft, Image as ImageIcon, Sparkles, Loader2, Eye } from 'lucide-react';
-import { slugify, cn } from '../../lib/utils';
+import { Save, ArrowLeft, Image as ImageIcon, Sparkles, Loader2, Eye, Trash2 } from 'lucide-react';
+import { slugify, cn, compressImage } from '../../lib/utils';
 import AIAssistant from '../../components/AIAssistant';
+import ImageGenerator from '../../components/ImageGenerator';
 import TiptapEditor from '../../components/TiptapEditor';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -35,16 +36,124 @@ const Editor: React.FC = () => {
     status: 'draft',
   });
 
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [imageGeneratorPrompt, setImageGeneratorPrompt] = useState('');
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setUploadSuccess(false);
+    setUploadProgress(0);
+    try {
+      // 1. Compress Image (Max 1MB, 1024px)
+      const optimizedFile = await compressImage(file);
+      
+      const fileName = `covers/${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, fileName);
+
+      const uploadTask = uploadBytesResumable(storageRef, optimizedFile, {
+        contentType: optimizedFile.type
+      });
+
+      const performUpload = (): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          // 2. Timeout Handling (60s)
+          const timeout = setTimeout(() => {
+            uploadTask.cancel();
+            reject(new Error('Waktu unggah habis (Timeout). Silakan coba lagi.'));
+          }, 60000);
+
+          uploadTask.on('state_changed', 
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              setUploadProgress(Math.round(progress));
+              console.log('Upload is ' + Math.round(progress) + '% done');
+            }, 
+            (error) => {
+              clearTimeout(timeout);
+              if (error.code === 'storage/canceled') {
+                reject(new Error('Unggahan dibatalkan karena koneksi lambat atau timeout.'));
+              } else {
+                reject(error);
+              }
+            }, 
+            async () => {
+              clearTimeout(timeout);
+              try {
+                const url = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(url);
+              } catch (err) {
+                reject(err);
+              }
+            }
+          );
+        });
+      };
+
+      const url = await performUpload();
+      setFormData(prev => ({ ...prev, coverImage: url }));
+      setUploadSuccess(true);
+      setUploadingImage(false);
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+      alert('Gagal mengunggah gambar: ' + (err.message || 'Terjadi kesalahan.'));
+      setUploadingImage(false);
+    }
+  };
 
   // Helper to upload image from URL to Firebase Storage
-  const uploadImageFromUrl = async (url: string, path: string): Promise<string> => {
+  const uploadImageFromUrl = async (url: string, path: string, retries = 2): Promise<string> => {
     try {
       const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
+      
+      // 1. Compress Image
+      const file = new File([blob], 'image.jpg', { type: blob.type });
+      const optimizedFile = await compressImage(file);
+      
       const storageRef = ref(storage, path);
-      await uploadBytes(storageRef, blob);
-      return await getDownloadURL(storageRef);
+      
+      const performUpload = async (retryCount: number): Promise<string> => {
+        try {
+          const uploadTask = uploadBytesResumable(storageRef, optimizedFile, {
+            contentType: optimizedFile.type || 'image/jpeg'
+          });
+
+          return await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              uploadTask.cancel();
+              reject(new Error('Timeout'));
+            }, 60000);
+
+            uploadTask.on('state_changed', null, 
+              (err) => {
+                clearTimeout(timeout);
+                reject(err);
+              }, 
+              async () => {
+                clearTimeout(timeout);
+                const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(downloadUrl);
+              }
+            );
+          });
+        } catch (err) {
+          if (retryCount > 0) {
+            console.log(`Retrying uploadFromUrl... attempts left: ${retryCount}`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return performUpload(retryCount - 1);
+          }
+          throw err;
+        }
+      };
+
+      return await performUpload(retries);
     } catch (err) {
       console.error('Error uploading image:', err);
       return url; // Fallback to original URL if upload fails
@@ -90,10 +199,26 @@ const Editor: React.FC = () => {
       let finalCoverImage = formData.coverImage;
       let finalContent = formData.content;
 
-      // If cover image is an external AI generated URL, upload it to Firebase
-      if (formData.coverImage && formData.coverImage.includes('pollinations.ai')) {
+      // Fallback for cover image if empty
+      if (!finalCoverImage) {
+        // Try to find first image in content
+        const parser = new DOMParser();
+        const docObj = parser.parseFromString(finalContent, 'text/html');
+        const firstImg = docObj.querySelector('img');
+        if (firstImg) {
+          finalCoverImage = firstImg.getAttribute('src') || '';
+        }
+        
+        // If still empty, use default image
+        if (!finalCoverImage) {
+          finalCoverImage = 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/dashboard%20admin-booking%20online-sourcecode99com.jpg';
+        }
+      }
+
+      // If cover image is an external AI generated URL (pollinations), upload it to Firebase
+      if (finalCoverImage && finalCoverImage.includes('pollinations.ai')) {
         const fileName = `covers/${Date.now()}-${formData.slug}.jpg`;
-        finalCoverImage = await uploadImageFromUrl(formData.coverImage, fileName);
+        finalCoverImage = await uploadImageFromUrl(finalCoverImage, fileName);
       }
 
       // If content contains external AI generated images, upload them too
@@ -108,11 +233,20 @@ const Editor: React.FC = () => {
           const src = img.getAttribute('src');
           if (src && src.includes('pollinations.ai')) {
             const fileName = `content/${Date.now()}-img-${i}.jpg`;
-            uploadPromises.push(
-              uploadImageFromUrl(src, fileName).then(newUrl => {
+            const tryUpload = async (retries = 2): Promise<void> => {
+              try {
+                const newUrl = await uploadImageFromUrl(src, fileName);
                 img.setAttribute('src', newUrl);
-              })
-            );
+              } catch (err) {
+                if (retries > 0) {
+                  console.log(`Retrying content image upload... attempts left: ${retries}`);
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  return tryUpload(retries - 1);
+                }
+                console.error('Failed to upload content image after retries:', err);
+              }
+            };
+            uploadPromises.push(tryUpload());
           }
         });
         
@@ -268,9 +402,17 @@ const Editor: React.FC = () => {
                 content: data.content,
                 excerpt: data.excerpt,
                 slug: slugify(data.title),
-                coverImage: `https://image.pollinations.ai/prompt/${encodeURIComponent(data.coverImagePrompt)}?width=1200&height=630&nologo=true`
+                coverImage: data.coverImageUrl || ''
               }));
+              setImageGeneratorPrompt(data.coverImagePrompt || '');
             }} 
+          />
+
+          <ImageGenerator 
+            defaultPrompt={imageGeneratorPrompt || formData.title}
+            onImageSaved={(url) => {
+              setFormData(prev => ({ ...prev, coverImage: url }));
+            }}
           />
 
           <div className="glass p-6 rounded-2xl space-y-4">
@@ -313,14 +455,59 @@ const Editor: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-slate-500 uppercase font-bold">Cover Image URL</label>
-              <div className="flex gap-2">
+              <label className="text-xs text-slate-500 uppercase font-bold">Cover Image</label>
+              <div className="space-y-3">
+                {formData.coverImage && (
+                  <div className="relative group rounded-xl overflow-hidden aspect-video bg-slate-900 border border-slate-800 shadow-lg">
+                    <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                    {uploadSuccess && (
+                      <div className="absolute top-2 left-2 bg-emerald-500/90 text-white text-[11px] font-bold px-2 py-1 rounded-md flex items-center gap-1 backdrop-blur-sm shadow-md animate-pulse">
+                        <span>✓ Berhasil diunggah</span>
+                      </div>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, coverImage: '' }));
+                        setUploadSuccess(false);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-80 hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
+
+                {uploadingImage && (
+                  <div className="space-y-1.5 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-blue-400 font-medium">Mengunggah gambar...</span>
+                      <span className="text-slate-400">{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div 
+                        className="bg-blue-500 h-1.5 rounded-full transition-all duration-300" 
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <label className={cn(
+                    "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-slate-800 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all cursor-pointer text-sm font-medium text-slate-400",
+                    uploadingImage && "opacity-50 cursor-not-allowed"
+                  )}>
+                    {uploadingImage ? <Loader2 className="animate-spin" size={18} /> : <ImageIcon size={18} />}
+                    {uploadingImage ? `Mengunggah (${uploadProgress}%)` : 'Browse Image'}
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} disabled={uploadingImage} />
+                  </label>
+                </div>
                 <input
                   type="text"
                   value={formData.coverImage}
                   onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                  placeholder="https://..."
-                  className="input-field text-sm"
+                  placeholder="Atau masukkan URL gambar..."
+                  className="input-field text-xs"
                 />
               </div>
             </div>

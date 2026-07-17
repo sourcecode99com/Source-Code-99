@@ -20,6 +20,7 @@ import AdminArticles from './src/pages/admin/Articles';
 import AdminEditor from './src/pages/admin/Editor';
 import AdminSchedule from './src/pages/admin/Schedule';
 import AdminLogin from './src/pages/admin/Login';
+import AdminSettings from './src/pages/admin/Settings';
 
 // Public Blog Pages
 import BlogList from './src/pages/public/BlogList';
@@ -88,6 +89,7 @@ const App: React.FC = () => {
             <Route path="editor" element={<AdminEditor />} />
             <Route path="editor/:id" element={<AdminEditor />} />
             <Route path="schedule" element={<AdminSchedule />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* Fallback */}

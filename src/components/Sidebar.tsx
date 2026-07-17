@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, PlusCircle, LogOut, Globe, Sun, Moon, Calendar } from 'lucide-react';
+import { LayoutDashboard, FileText, PlusCircle, LogOut, Globe, Sun, Moon, Calendar, Settings } from 'lucide-react';
 import { auth } from '../services/firebase';
 import { cn } from '../lib/utils';
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     { to: '/admin/articles', icon: FileText, label: 'Articles' },
     { to: '/admin/editor', icon: PlusCircle, label: 'Create Article' },
     { to: '/admin/schedule', icon: Calendar, label: 'Schedule' },
+    { to: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 
   return (

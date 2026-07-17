@@ -62,33 +62,23 @@ export const processSchedule = async (schedule: Schedule) => {
     const slug = slugify(aiData.title);
 
     // 2. Prepare Images
-    let finalCoverImage = `https://image.pollinations.ai/prompt/${encodeURIComponent(aiData.coverImagePrompt)}?width=1200&height=630&nologo=true`;
+    let finalCoverImage = aiData.coverImageUrl || '';
     let finalContent = aiData.content;
 
-    // Upload Cover
-    const coverFileName = `covers/${Date.now()}-${slug}.jpg`;
-    finalCoverImage = await uploadImageFromUrl(finalCoverImage, coverFileName);
-
-    // Upload Content Images (if any)
-    if (finalContent.includes('pollinations.ai')) {
+    // Fallback for cover image if empty
+    if (!finalCoverImage) {
+      // Try to find first image in content
       const parser = new DOMParser();
       const docObj = parser.parseFromString(finalContent, 'text/html');
-      const images = docObj.querySelectorAll('img');
+      const firstImg = docObj.querySelector('img');
+      if (firstImg) {
+        finalCoverImage = firstImg.getAttribute('src') || '';
+      }
       
-      const uploadPromises: Promise<void>[] = [];
-      images.forEach((img, i) => {
-        const src = img.getAttribute('src');
-        if (src && src.includes('pollinations.ai')) {
-          const fileName = `content/${Date.now()}-img-${i}.jpg`;
-          uploadPromises.push(
-            uploadImageFromUrl(src, fileName).then(newUrl => {
-              img.setAttribute('src', newUrl);
-            })
-          );
-        }
-      });
-      await Promise.all(uploadPromises);
-      finalContent = docObj.body.innerHTML;
+      // If still empty, use default image
+      if (!finalCoverImage) {
+        finalCoverImage = 'https://f4emyvqrnyc7uxog.public.blob.vercel-storage.com/web-sc99com/dashboard%20admin-booking%20online-sourcecode99com.jpg';
+      }
     }
 
     // 3. Create Article

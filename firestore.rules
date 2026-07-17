@@ -34,5 +34,11 @@ service cloud.firestore {
       // Only authenticated users can access schedules
       allow read, write: if isAuthenticated();
     }
+
+    // Settings collection
+    match /settings/{settingId} {
+      // Only authenticated users can access settings
+      allow read, write: if isAuthenticated();
+    }
   }
 }

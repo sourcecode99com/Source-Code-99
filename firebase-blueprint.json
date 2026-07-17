@@ -31,6 +31,18 @@
         "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
       },
       "required": ["topic", "publishDate", "status"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "API keys and integrations configuration",
+      "type": "object",
+      "properties": {
+        "articleKey": { "type": "string", "description": "Encrypted API key for article text generation" },
+        "imageKey": { "type": "string", "description": "Encrypted API key for cover image generation" },
+        "articleUsage": { "type": "number", "description": "Usage counter for article generation keys" },
+        "imageUsage": { "type": "number", "description": "Usage counter for image generation keys" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of last settings modification" }
+      }
     }
   },
   "firestore": {
@@ -41,6 +53,10 @@
     "/schedules/{scheduleId}": {
       "schema": "Schedule",
       "description": "Collection of content schedules"
+    },
+    "/settings/{settingId}": {
+      "schema": "Settings",
+      "description": "API keys and configuration settings"
     }
   }
 }
