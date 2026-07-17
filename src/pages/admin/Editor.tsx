@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { ref, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
-import { db, auth, storage } from '../../services/firebase';
+import { db, auth } from '../../services/firebase';
 import { Article, ArticleInput } from '../../types';
 import { Save, ArrowLeft, Image as ImageIcon, Sparkles, Loader2, Eye, Trash2 } from 'lucide-react';
-import { slugify, cn, compressImage } from '../../lib/utils';
+import { slugify, cn, compressImage, uploadImageToCloudflare } from '../../lib/utils';
 import AIAssistant from '../../components/AIAssistant';
 import ImageGenerator from '../../components/ImageGenerator';
 import TiptapEditor from '../../components/TiptapEditor';
@@ -52,97 +51,36 @@ const Editor: React.FC = () => {
     try {
       // 1. Compress Image (Max 1MB, 1024px)
       const optimizedFile = await compressImage(file);
-      
-      const fileName = `covers/${Date.now()}-${file.name}`;
-      const storageRef = ref(storage, fileName);
+      setUploadProgress(50);
 
-      const uploadTask = uploadBytesResumable(storageRef, optimizedFile, {
-        contentType: optimizedFile.type
-      });
+      // 2. Upload to Cloudflare Images via our server-side proxy
+      const url = await uploadImageToCloudflare(optimizedFile);
+      setUploadProgress(100);
 
-      const performUpload = (): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          // 2. Timeout Handling (60s)
-          const timeout = setTimeout(() => {
-            uploadTask.cancel();
-            reject(new Error('Waktu unggah habis (Timeout). Silakan coba lagi.'));
-          }, 60000);
-
-          uploadTask.on('state_changed', 
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadProgress(Math.round(progress));
-              console.log('Upload is ' + Math.round(progress) + '% done');
-            }, 
-            (error) => {
-              clearTimeout(timeout);
-              if (error.code === 'storage/canceled') {
-                reject(new Error('Unggahan dibatalkan karena koneksi lambat atau timeout.'));
-              } else {
-                reject(error);
-              }
-            }, 
-            async () => {
-              clearTimeout(timeout);
-              try {
-                const url = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve(url);
-              } catch (err) {
-                reject(err);
-              }
-            }
-          );
-        });
-      };
-
-      const url = await performUpload();
       setFormData(prev => ({ ...prev, coverImage: url }));
       setUploadSuccess(true);
-      setUploadingImage(false);
     } catch (err: any) {
       console.error('Upload failed:', err);
       alert('Gagal mengunggah gambar: ' + (err.message || 'Terjadi kesalahan.'));
+    } finally {
       setUploadingImage(false);
     }
   };
 
-  // Helper to upload image from URL to Firebase Storage
-  const uploadImageFromUrl = async (url: string, path: string, retries = 2): Promise<string> => {
+  // Helper to download an external image (e.g. AI-generated) and re-upload it to Cloudflare Images
+  const uploadImageFromUrl = async (url: string, _path: string, retries = 2): Promise<string> => {
     try {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
-      
+
       // 1. Compress Image
       const file = new File([blob], 'image.jpg', { type: blob.type });
       const optimizedFile = await compressImage(file);
-      
-      const storageRef = ref(storage, path);
-      
+
       const performUpload = async (retryCount: number): Promise<string> => {
         try {
-          const uploadTask = uploadBytesResumable(storageRef, optimizedFile, {
-            contentType: optimizedFile.type || 'image/jpeg'
-          });
-
-          return await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              uploadTask.cancel();
-              reject(new Error('Timeout'));
-            }, 60000);
-
-            uploadTask.on('state_changed', null, 
-              (err) => {
-                clearTimeout(timeout);
-                reject(err);
-              }, 
-              async () => {
-                clearTimeout(timeout);
-                const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve(downloadUrl);
-              }
-            );
-          });
+          return await uploadImageToCloudflare(optimizedFile);
         } catch (err) {
           if (retryCount > 0) {
             console.log(`Retrying uploadFromUrl... attempts left: ${retryCount}`);
@@ -159,7 +97,6 @@ const Editor: React.FC = () => {
       return url; // Fallback to original URL if upload fails
     }
   };
-
   useEffect(() => {
     if (id) {
       const fetchArticle = async () => {
