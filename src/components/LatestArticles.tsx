@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore';
-import { db } from '../services/firebase';
+import { collection, query, where, getDocs, limit, orderBy } from 'firebase/firestore/lite';
+import { dbLite } from '../services/firebase';
 import { Article } from '../types';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -19,7 +19,7 @@ const LatestArticles: React.FC<LatestArticlesProps> = ({ lang }) => {
     const fetchArticles = async () => {
       try {
         const q = query(
-          collection(db, 'articles'),
+          collection(dbLite, 'articles'),
           where('status', '==', 'published'),
           orderBy('createdAt', 'desc'),
           limit(3)
@@ -44,17 +44,17 @@ const LatestArticles: React.FC<LatestArticlesProps> = ({ lang }) => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-              {lang === 'ID' ? 'Artikel ' : 'Latest '} 
+              {lang === 'ID' ? 'Artikel ' : 'Latest '}
               <span className="text-blue-500">{lang === 'ID' ? 'Terkini' : 'Articles'}</span>
             </h2>
             <p className="text-slate-400 max-w-xl">
-              {lang === 'ID' 
+              {lang === 'ID'
                 ? 'Wawasan terbaru seputar teknologi dan strategi digital untuk pertumbuhan bisnis Anda.'
                 : 'Latest insights on technology and digital strategies for your business growth.'}
             </p>
           </div>
-          <Link 
-            to="/blog" 
+          <Link
+            to="/blog"
             className="inline-flex items-center gap-2 text-blue-500 font-bold hover:gap-4 transition-all"
           >
             {lang === 'ID' ? 'Lihat Semua Artikel' : 'View All Articles'} <ArrowRight size={20} />
@@ -68,14 +68,14 @@ const LatestArticles: React.FC<LatestArticlesProps> = ({ lang }) => {
             ))
           ) : (
             articles.map((article) => (
-              <Link 
-                key={article.id} 
+              <Link
+                key={article.id}
                 to={`/blog/${article.slug}`}
                 className="group glass rounded-[2.5rem] overflow-hidden hover:border-blue-500/50 transition-all duration-300 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden">
-                  <img 
-                    src={article.coverImage || `https://picsum.photos/seed/${article.slug}/800/600`} 
+                  <img
+                    src={article.coverImage || `https://picsum.photos/seed/${article.slug}/800/600`}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
