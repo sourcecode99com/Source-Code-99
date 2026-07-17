@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore/lite';
+import { dbLite } from '../../services/firebase';
 import { Article } from '../../types';
 import { format } from 'date-fns';
 import { ArrowLeft, Calendar, User, Tag, Share2, ArrowRight } from 'lucide-react';
@@ -22,7 +22,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
     const fetchArticle = async () => {
       try {
         const q = query(
-          collection(db, 'articles'),
+          collection(dbLite, 'articles'),
           where('slug', '==', slug),
           limit(1)
         );

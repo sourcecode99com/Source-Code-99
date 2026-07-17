@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore/lite';
+import { dbLite } from '../../services/firebase';
 import { Article } from '../../types';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -22,7 +22,7 @@ const BlogList: React.FC<BlogListProps> = ({ lang }) => {
     const fetchArticles = async () => {
       try {
         const q = query(
-          collection(db, 'articles'),
+          collection(dbLite, 'articles'),
           where('status', '==', 'published')
         );
         const snapshot = await getDocs(q);
