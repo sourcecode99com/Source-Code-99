@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Loader2, Save, ImageIcon, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import { generateImage } from '../services/aiService';
-import { storage } from '../services/firebase';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { cn, isValidBase64, base64ToFile, compressImage } from '../lib/utils';
+import { cn, isValidBase64, base64ToFile, compressImage, uploadImageToCloudflare } from '../lib/utils';
 
 interface ImageGeneratorProps {
   onImageSaved: (url: string) => void;
@@ -27,7 +25,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageSaved, defaultPr
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
-    
+
     setGenerating(true);
     setError(null);
     setSuccess(false);
@@ -55,70 +53,25 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageSaved, defaultPr
     setSuccess(false);
     setUploadProgress(0);
 
-    const performUpload = async (): Promise<void> => {
-      try {
-        const timestamp = Date.now();
-        const filename = `ai-gen-${timestamp}.jpg`;
-        
-        // 1. Convert Base64 to File safely
-        const rawFile = base64ToFile(previewUrl, filename);
-        
-        // 2. Compress Image (Max 1MB, 1024px)
-        const optimizedFile = await compressImage(rawFile);
-        
-        const storageRef = ref(storage, `articles/${filename}`);
-        
-        // 3. Resumable Upload with Metadata
-        const uploadTask = uploadBytesResumable(storageRef, optimizedFile, {
-          contentType: 'image/jpeg',
-          customMetadata: {
-            'generated-by': 'Gemini AI',
-            'original-prompt': prompt
-          }
-        });
-
-        return new Promise((resolve, reject) => {
-          // 4. Timeout Handling (60s)
-          const timeout = setTimeout(() => {
-            uploadTask.cancel();
-            reject(new Error('Waktu unggah habis (Timeout). Silakan coba lagi.'));
-          }, 60000);
-
-          uploadTask.on('state_changed', 
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setUploadProgress(Math.round(progress));
-            },
-            (err) => {
-              clearTimeout(timeout);
-              if (err.code === 'storage/canceled') {
-                reject(new Error('Unggahan dibatalkan karena koneksi lambat.'));
-              } else {
-                reject(err);
-              }
-            },
-            async () => {
-              clearTimeout(timeout);
-              try {
-                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                onImageSaved(downloadURL);
-                setSuccess(true);
-                resolve();
-              } catch (err) {
-                reject(err);
-              }
-            }
-          );
-        });
-      } catch (err: any) {
-        console.error('Upload error:', err);
-        throw err;
-      }
-    };
-
     try {
-      await performUpload();
+      const timestamp = Date.now();
+      const filename = `ai-gen-${timestamp}.jpg`;
+
+      // 1. Convert Base64 to File safely
+      const rawFile = base64ToFile(previewUrl, filename);
+
+      // 2. Compress Image (Max 1MB, 1024px)
+      const optimizedFile = await compressImage(rawFile);
+      setUploadProgress(50);
+
+      // 3. Upload to Cloudflare Images via our server-side proxy
+      const url = await uploadImageToCloudflare(optimizedFile);
+      setUploadProgress(100);
+
+      onImageSaved(url);
+      setSuccess(true);
     } catch (err: any) {
+      console.error('Upload error:', err);
       setError(err.message || 'Gagal mengunggah gambar ke storage.');
     } finally {
       setUploading(false);
@@ -139,7 +92,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageSaved, defaultPr
           placeholder="Deskripsikan gambar yang ingin dibuat (Contoh: Modern tech office with neon lights, 4k, cinematic)..."
           className="input-field h-24 resize-none py-3 text-sm"
         />
-        
+
         <button
           onClick={handleGenerate}
           disabled={generating || uploading || !prompt.trim()}
@@ -177,8 +130,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageSaved, defaultPr
               className="flex-1 btn-primary py-3 flex items-center justify-center gap-2 relative overflow-hidden"
             >
               {uploading && (
-                <div 
-                  className="absolute inset-0 bg-blue-400/20 transition-all duration-300" 
+                <div
+                  className="absolute inset-0 bg-blue-400/20 transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               )}
@@ -191,7 +144,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onImageSaved, defaultPr
                 <span>{uploading ? `Saving (${uploadProgress}%)` : 'Save & Use Image'}</span>
               </div>
             </button>
-            
+
             <button
               onClick={handleGenerate}
               disabled={generating || uploading}
