@@ -34,7 +34,7 @@ export function base64ToFile(base64: string, filename: string): File {
   try {
     const arr = base64.split(',');
     if (arr.length < 2) throw new Error('Invalid base64 format');
-    
+
     const mimeMatch = arr[0].match(/:(.*?);/);
     const mime = mimeMatch ? mimeMatch[1] : 'image/png';
     const bstr = atob(arr[1]);
@@ -62,7 +62,7 @@ export async function compressImage(file: File): Promise<File> {
     useWebWorker: true,
     fileType: 'image/jpeg' as string,
   };
-  
+
   try {
     const compressedBlob = await imageCompression(file, options);
     return new File([compressedBlob], file.name, { type: 'image/jpeg' });
@@ -70,4 +70,39 @@ export async function compressImage(file: File): Promise<File> {
     console.error('Compression error:', error);
     return file; // Return original if compression fails
   }
+}
+
+/**
+ * Converts a File to a base64 data URL
+ */
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Uploads an (ideally already-compressed) image file to Cloudflare Images
+ * via our own /api/upload-image serverless function, so the Cloudflare API
+ * token stays server-side only.
+ */
+export async function uploadImageToCloudflare(file: File): Promise<string> {
+  const dataUrl = await fileToDataUrl(file);
+
+  const response = await fetch('/api/upload-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: dataUrl, filename: file.name }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({} as { error?: string }));
+    throw new Error(err.error || 'Gagal mengunggah gambar.');
+  }
+
+  const data = await response.json();
+  return data.url as string;
 }
