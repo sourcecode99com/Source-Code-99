@@ -1,8 +1,11 @@
 // Vercel Serverless Function: POST /api/upload-image
-// Proxies image uploads to Cloudflare Images so the API token never
-// reaches the browser. Client sends a base64 data URL (already compressed
-// client-side via browser-image-compression); this function decodes it,
-// forwards it to Cloudflare, and returns the public delivery URL.
+// Uploads images to Cloudflare R2 (S3-compatible object storage) so the R2
+// credentials never reach the browser. Client sends a base64 data URL
+// (already compressed client-side via browser-image-compression); this
+// function decodes it, signs an S3 PUT request with aws4fetch, and returns
+// the public delivery URL served via the R2 bucket's custom domain.
+
+import { AwsClient } from 'aws4fetch';
 
 export const config = {
   api: {
@@ -18,11 +21,14 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+  const accountId = process.env.R2_ACCOUNT_ID;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const bucketName = process.env.R2_BUCKET_NAME;
+  const publicUrl = process.env.R2_PUBLIC_URL;
 
-  if (!accountId || !apiToken) {
-    return res.status(500).json({ error: 'Cloudflare Images belum dikonfigurasi di server.' });
+  if (!accountId || !accessKeyId || !secretAccessKey || !bucketName || !publicUrl) {
+    return res.status(500).json({ error: 'Cloudflare R2 belum dikonfigurasi di server.' });
   }
 
   try {
@@ -40,35 +46,34 @@ export default async function handler(req: any, res: any) {
     const mimeType = match[1];
     const buffer = Buffer.from(match[2], 'base64');
 
-    const form = new FormData();
-    form.append('file', new Blob([buffer], { type: mimeType }), filename || `upload-${Date.now()}.jpg`);
+    const extFromMime = mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg';
+    const safeBase = (filename || `upload-${Date.now()}`).replace(/[^a-zA-Z0-9._-]/g, '_');
+    const key = `${Date.now()}-${safeBase.includes('.') ? safeBase : `${safeBase}.${extFromMime}`}`;
 
-    const cfResponse = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${accountId}/images/v1`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-        },
-        body: form,
-      }
-    );
+    const client = new AwsClient({
+      accessKeyId,
+      secretAccessKey,
+      service: 's3',
+      region: 'auto',
+    });
 
-    const data = await cfResponse.json();
+    const endpoint = `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${key}`;
 
-    if (!data.success) {
-      console.error('Cloudflare Images upload failed:', JSON.stringify(data.errors));
-      return res.status(502).json({ error: 'Gagal mengunggah gambar ke Cloudflare Images.', details: data.errors });
+    const putResponse = await client.fetch(endpoint, {
+      method: 'PUT',
+      headers: { 'Content-Type': mimeType },
+      body: buffer,
+    });
+
+    if (!putResponse.ok) {
+      const details = await putResponse.text().catch(() => '');
+      console.error('R2 upload failed:', putResponse.status, details);
+      return res.status(502).json({ error: 'Gagal mengunggah gambar ke Cloudflare R2.', details });
     }
 
-    const variants: string[] = data.result?.variants || [];
-    const publicUrl = variants.find((v) => v.endsWith('/public')) || variants[0];
+    const finalUrl = `${publicUrl.replace(/\/$/, '')}/${key}`;
 
-    if (!publicUrl) {
-      return res.status(502).json({ error: 'Cloudflare tidak mengembalikan URL gambar.' });
-    }
-
-    return res.status(200).json({ url: publicUrl, id: data.result.id });
+    return res.status(200).json({ url: finalUrl, key });
   } catch (err: any) {
     console.error('upload-image error:', err);
     return res.status(500).json({ error: err.message || 'Terjadi kesalahan tak terduga.' });
