@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { Article } from '../../types';
@@ -36,13 +37,22 @@ const BlogList: React.FC<BlogListProps> = ({ lang }) => {
     fetchArticles();
   }, []);
 
-  const filtered = articles.filter(a => 
+  const filtered = articles.filter(a =>
     a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 pt-24">
+      <Helmet>
+        <title>Blog | Insight Transformasi Digital - Source Code 99</title>
+        <meta name="description" content="Kumpulan artikel seputar transformasi digital, pengembangan website, aplikasi, dan strategi pertumbuhan bisnis dari Source Code 99." />
+        <link rel="canonical" href="https://www.sourcecode99.com/blog" />
+        <meta property="og:title" content="Blog | Source Code 99" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.sourcecode99.com/blog" />
+      </Helmet>
+
       <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
         <header className="text-center space-y-4 max-w-2xl mx-auto">
           <h1 className="text-5xl font-bold text-white tracking-tight">{t.title}</h1>
@@ -50,7 +60,7 @@ const BlogList: React.FC<BlogListProps> = ({ lang }) => {
             {t.subtitle}
           </p>
           <div className="relative max-w-md mx-auto pt-4">
-            <button 
+            <button
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-500 transition-colors z-10"
               aria-label="Search"
             >
@@ -75,14 +85,14 @@ const BlogList: React.FC<BlogListProps> = ({ lang }) => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {filtered.map((article) => (
-              <Link 
-                key={article.id} 
+              <Link
+                key={article.id}
                 to={`/blog/${article.slug}`}
                 className="group glass rounded-3xl overflow-hidden hover:border-blue-500/50 transition-all duration-300 flex flex-col"
               >
                 <div className="aspect-video overflow-hidden">
-                  <img 
-                    src={article.coverImage || `https://picsum.photos/seed/${article.slug}/800/600`} 
+                  <img
+                    src={article.coverImage || `https://picsum.photos/seed/${article.slug}/800/600`}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
@@ -127,10 +137,10 @@ const BlogList: React.FC<BlogListProps> = ({ lang }) => {
                 {translations[lang].cta.subheadline}
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <a 
-                  href="https://wa.me/6285123876559?text=Halo%20Sourcecode99.com%20Saya%20ingin%20berdiskusi" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href="https://wa.me/6285123876559?text=Halo%20Sourcecode99.com%20Saya%20ingin%20berdiskusi"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full sm:w-auto px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-3xl text-xl font-black transition-all transform hover:scale-105 hover:shadow-[0_0_40px_rgba(37,99,235,0.4)] flex items-center justify-center gap-3"
                 >
                   {translations[lang].cta.btn1} <ArrowRight size={24} />
