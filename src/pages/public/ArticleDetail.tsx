@@ -17,6 +17,23 @@ const FETCH_RETRY_DELAY_MS = 1500;
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Articles can arrive from two places: the client-side Firestore fetch below
+// (where createdAt is a Firestore Timestamp with a .toDate() method), or a
+// pre-rendered <script> tag injected server-side for crawlers (see
+// middleware.ts), where createdAt has already been serialized to an ISO
+// string. This helper normalizes both shapes to a plain Date.
+const resolveArticleDate = (createdAt: unknown): Date | undefined => {
+  if (!createdAt) return undefined;
+  if (typeof (createdAt as { toDate?: () => Date }).toDate === 'function') {
+    return (createdAt as { toDate: () => Date }).toDate();
+  }
+  if (typeof createdAt === 'string') {
+    const parsed = new Date(createdAt);
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+  return undefined;
+};
+
 const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
   const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<Article | null>(null);
@@ -29,6 +46,19 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
     setLoading(true);
     setNotFoundConfirmed(false);
     setArticle(null);
+
+    // If this page was served to a crawler, middleware.ts already fetched
+    // the article server-side (bypassing the client Firestore round-trip
+    // entirely) and injected it here. Use it directly instead of re-fetching,
+    // so the correct <head> tags set by the server are never replaced by a
+    // client-side "not found" state while data is (re)loading.
+    const preloaded = (window as any).__PRERENDERED_ARTICLE__;
+    if (preloaded && preloaded.slug === slug) {
+      setArticle(preloaded as Article);
+      setLoading(false);
+      window.scrollTo(0, 0);
+      return;
+    }
 
     const fetchArticle = async () => {
       for (let attempt = 0; attempt <= MAX_FETCH_RETRIES; attempt++) {
@@ -91,7 +121,8 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
   }
 
   const canonicalUrl = `https://www.sourcecode99.com/blog/${article.slug}`;
-  const publishedDate = article.createdAt?.toDate ? article.createdAt.toDate().toISOString() : undefined;
+  const articleDate = resolveArticleDate(article.createdAt);
+  const publishedDate = articleDate ? articleDate.toISOString() : undefined;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 pb-24 pt-24">
@@ -150,7 +181,7 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
             </div>
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-blue-500" />
-              <span>{format(article.createdAt.toDate(), 'MMMM dd, yyyy')}</span>
+              <span>{articleDate ? format(articleDate, 'MMMM dd, yyyy') : ''}</span>
             </div>
           </div>
         </header>
