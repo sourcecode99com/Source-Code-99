@@ -12,35 +12,72 @@ interface ArticleDetailProps {
   lang: Language;
 }
 
+const MAX_FETCH_RETRIES = 3;
+const FETCH_RETRY_DELAY_MS = 1500;
+
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const ArticleDetail: React.FC<ArticleDetailProps> = ({ lang }) => {
   const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFoundConfirmed, setNotFoundConfirmed] = useState(false);
   const t = translations[lang].blog;
 
   useEffect(() => {
+    let isCancelled = false;
+    setLoading(true);
+    setNotFoundConfirmed(false);
+    setArticle(null);
+
     const fetchArticle = async () => {
-      try {
-        const q = query(
-          collection(dbLite, 'articles'),
-          where('slug', '==', slug),
-          limit(1)
-        );
-        const snapshot = await getDocs(q);
-        if (!snapshot.empty) {
-          setArticle({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Article);
+      for (let attempt = 0; attempt <= MAX_FETCH_RETRIES; attempt++) {
+        try {
+          const q = query(
+            collection(dbLite, 'articles'),
+            where('slug', '==', slug),
+            limit(1)
+          );
+          const snapshot = await getDocs(q);
+
+          if (isCancelled) return;
+
+          if (!snapshot.empty) {
+            setArticle({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as Article);
+            setLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.error(err);
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
+
+        // Article not found (or fetch failed) on this attempt.
+        // Retry with a delay instead of immediately concluding "not found",
+        // since this could just be a slow Firestore response (e.g. for crawlers).
+        if (attempt < MAX_FETCH_RETRIES) {
+          await wait(FETCH_RETRY_DELAY_MS);
+          if (isCancelled) return;
+        }
+      }
+
+      // Only after exhausting all retries do we confirm the article is missing.
+      if (!isCancelled) {
+        setNotFoundConfirmed(true);
         setLoading(false);
       }
     };
+
     fetchArticle();
     window.scrollTo(0, 0);
+
+    return () => {
+      isCancelled = true;
+    };
   }, [slug]);
 
-  if (loading) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">{t.loading}</div>;
+  if (loading || (!article && !notFoundConfirmed)) {
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-500">{t.loading}</div>;
+  }
 
   if (!article) {
     return (
