@@ -18,8 +18,19 @@ export const config = {
 const FIREBASE_PROJECT_ID = 'gen-lang-client-0769814319';
 const FIRESTORE_DATABASE_ID = 'ai-studio-502f575a-53ba-47b2-9548-f8e2479c1a84';
 
+// NOTE: Google Search Console's URL Inspection / "Test Live URL" tool does
+// NOT use the regular "Googlebot" user agent - it identifies itself as
+// "Google-InspectionTool/1.0". Without that token in this list, this
+// middleware treated GSC's live test as a normal visitor and skipped
+// prerendering entirely, which is why the live test kept showing 'noindex'
+// even after this middleware was deployed. Also added a few other Google
+// crawler variants for robustness.
 const BOT_USER_AGENTS = [
   'googlebot',
+  'google-inspectiontool',
+  'googleother',
+  'adsbot-google',
+  'mediapartners-google',
   'bingbot',
   'slurp', // Yahoo
   'duckduckbot',
@@ -149,21 +160,21 @@ function buildHeadInjection(article: ArticleDoc, canonicalUrl: string): string {
   const serializedArticle = JSON.stringify(article).replace(/</g, '\\u003c');
 
   return `
-    <title>${escapeHtml(title)}</title>
-    <meta name="description" content="${escapeHtml(description)}" />
-    <link rel="canonical" href="${canonicalUrl}" />
-    <meta property="og:type" content="article" />
-    <meta property="og:title" content="${escapeHtml(article.title)}" />
-    <meta property="og:description" content="${escapeHtml(description)}" />
-    <meta property="og:url" content="${canonicalUrl}" />
-    ${image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : ''}
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${escapeHtml(article.title)}" />
-    <meta name="twitter:description" content="${escapeHtml(description)}" />
-    ${image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : ''}
-    <script type="application/ld+json">${jsonLd}</script>
-    <script>window.__PRERENDERED_ARTICLE__ = ${serializedArticle};</script>
-  `;
+<title>${escapeHtml(title)}</title>
+<meta name="description" content="${escapeHtml(description)}" />
+<link rel="canonical" href="${canonicalUrl}" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="${escapeHtml(article.title)}" />
+<meta property="og:description" content="${escapeHtml(description)}" />
+<meta property="og:url" content="${canonicalUrl}" />
+${image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : ''}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${escapeHtml(article.title)}" />
+<meta name="twitter:description" content="${escapeHtml(description)}" />
+${image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : ''}
+<script type="application/ld+json">${jsonLd}</script>
+<script>window.__PRERENDERED_ARTICLE__ = ${serializedArticle};</script>
+`;
 }
 
 export default async function middleware(request: Request) {
