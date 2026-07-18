@@ -2,12 +2,12 @@ import { next } from '@vercel/functions';
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 
-// This Routing Middleware only targets blog article pages, and only does
-// extra work when the request looks like it's coming from a search engine
-// or link-preview crawler. Regular visitors are untouched and simply fall
-// through to the normal client-side rendered SPA via next().
+// This Routing Middleware targets blog article pages (to prerender them for
+// crawlers) and the dynamic sitemap endpoint (to keep it in sync with
+// Firestore automatically, without needing a manual rebuild/deploy every
+// time a new article is published).
 export const config = {
-  matcher: ['/blog/:path*'],
+  matcher: ['/blog/:path*', '/sitemap.xml'],
   runtime: 'nodejs',
 };
 
@@ -17,6 +17,7 @@ export const config = {
 // here directly. Only the service account credentials below are sensitive.
 const FIREBASE_PROJECT_ID = 'gen-lang-client-0769814319';
 const FIRESTORE_DATABASE_ID = 'ai-studio-502f575a-53ba-47b2-9548-f8e2479c1a84';
+const SITE_ORIGIN = 'https://www.sourcecode99.com';
 
 // NOTE: Google Search Console's URL Inspection / "Test Live URL" tool does
 // NOT use the regular "Googlebot" user agent - it identifies itself as
@@ -64,7 +65,7 @@ function getAdminApp() {
   if (existing.length > 0) return existing[0];
 
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  // Private keys are usually stored in env vars with literal "\n" sequences
+  // Private keys are usually stored in env vars with literal "\\n" sequences
   // instead of real newlines, so they need to be converted back.
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
@@ -130,6 +131,57 @@ async function fetchPublishedArticle(slug: string): Promise<ArticleDoc | null> {
   };
 }
 
+interface ArticleSitemapEntry {
+  slug: string;
+  lastmod?: string;
+}
+
+async function fetchAllPublishedArticleSlugs(): Promise<ArticleSitemapEntry[]> {
+  const app = getAdminApp();
+  const db = getFirestore(app, FIRESTORE_DATABASE_ID);
+
+  const snapshot = await db.collection('articles').where('status', '==', 'published').get();
+
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const createdAt = data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : undefined;
+    return { slug: data.slug, lastmod: createdAt ? createdAt.slice(0, 10) : undefined };
+  });
+}
+
+// Static, non-article pages that were previously hardcoded in
+// public/sitemap.xml. Kept here so the dynamic sitemap fully replaces the
+// static one instead of only covering blog articles.
+const STATIC_SITEMAP_ENTRIES: { loc: string; priority: string; lastmod: string }[] = [
+  { loc: `${SITE_ORIGIN}/`, priority: '1.0', lastmod: '2026-01-01' },
+  { loc: `${SITE_ORIGIN}/services`, priority: '0.8', lastmod: '2026-01-01' },
+  { loc: `${SITE_ORIGIN}/privacy`, priority: '0.3', lastmod: '2026-01-01' },
+  { loc: `${SITE_ORIGIN}/terms`, priority: '0.3', lastmod: '2026-01-01' },
+];
+
+async function buildSitemapXml(): Promise<string> {
+  const articles = await fetchAllPublishedArticleSlugs();
+
+  const articleEntries = articles
+    .filter((a) => !!a.slug)
+    .map((a) => ({
+      loc: `${SITE_ORIGIN}/blog/${a.slug}`,
+      priority: '0.7',
+      lastmod: a.lastmod,
+    }));
+
+  const allEntries = [...STATIC_SITEMAP_ENTRIES, ...articleEntries];
+
+  const urlXml = allEntries
+    .map((entry) => {
+      const lastmodTag = entry.lastmod ? `${entry.lastmod}</lastmod>\n` : '';
+      return `<url>\n<loc>${entry.loc}</loc>\n${lastmodTag}<priority>${entry.priority}</priority>\n</url>`;
+    })
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlXml}\n</urlset>`;
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -152,12 +204,12 @@ function buildHeadInjection(article: ArticleDoc, canonicalUrl: string): string {
     author: { '@type': 'Person', name: article.author },
     datePublished: article.createdAt,
     mainEntityOfPage: canonicalUrl,
-  }).replace(/</g, '\\u003c');
+  }).replace(/</g, '\u003c');
 
   // Embedded so the React app can hydrate instantly from this data instead
   // of re-querying Firestore client-side (which is what was failing for
   // crawlers in the first place - see PR #4 for background).
-  const serializedArticle = JSON.stringify(article).replace(/</g, '\\u003c');
+  const serializedArticle = JSON.stringify(article).replace(/</g, '\u003c');
 
   return `
 <title>${escapeHtml(title)}</title>
@@ -178,13 +230,35 @@ ${image ? `<meta name="twitter:image" content="${escapeHtml(image)}" />` : ''}
 }
 
 export default async function middleware(request: Request) {
+  const url = new URL(request.url);
+
+  // Dynamic sitemap: generated on every request (cached at the edge, see
+  // headers below) directly from Firestore, so newly published articles
+  // show up automatically without a manual rebuild/redeploy. Served for
+  // ALL requesters (not just bots) since this needs to work for direct
+  // browser checks and Search Console's sitemap fetcher too.
+  if (url.pathname === '/sitemap.xml') {
+    try {
+      const xml = await buildSitemapXml();
+      return new Response(xml, {
+        status: 200,
+        headers: {
+          'content-type': 'application/xml; charset=utf-8',
+          'cache-control': 'public, s-maxage=3600, stale-while-revalidate=300',
+        },
+      });
+    } catch (err) {
+      console.error('[middleware] Failed to generate dynamic sitemap, falling back to static file:', err);
+      return next();
+    }
+  }
+
   const userAgent = request.headers.get('user-agent');
 
   if (!isBotRequest(userAgent)) {
     return next();
   }
 
-  const url = new URL(request.url);
   const match = url.pathname.match(/^\/blog\/([^/]+)\/?$/);
   const slug = match?.[1];
 
@@ -207,7 +281,7 @@ export default async function middleware(request: Request) {
     }
     const baseHtml = await baseHtmlRes.text();
 
-    const canonicalUrl = `https://www.sourcecode99.com/blog/${article.slug}`;
+    const canonicalUrl = `${SITE_ORIGIN}/blog/${article.slug}`;
     const headInjection = buildHeadInjection(article, canonicalUrl);
     const html = baseHtml.replace('</head>', `${headInjection}</head>`);
 
