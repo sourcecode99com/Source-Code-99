@@ -174,7 +174,7 @@ async function buildSitemapXml(): Promise<string> {
 
   const urlXml = allEntries
     .map((entry) => {
-      const lastmodTag = entry.lastmod ? `${entry.lastmod}</lastmod>\n` : '';
+      const lastmodTag = entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>\n` : '';
       return `<url>\n<loc>${entry.loc}</loc>\n${lastmodTag}<priority>${entry.priority}</priority>\n</url>`;
     })
     .join('\n');
